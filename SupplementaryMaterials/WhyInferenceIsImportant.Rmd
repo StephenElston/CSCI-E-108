@@ -1,0 +1,471 @@
+
+---
+title: "Introduction to Inference and Confidence Intervals"
+author: "Steve Elston"
+date: "10/09/2023"
+output:
+  slidy_presentation: default
+  pdf_document: default
+  beamer_presentation: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+use_python("C:/Users/steph/anaconda3")
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+#knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+
+## Review  
+
+- Likelihood is a measure of how well a **parametric model** fits a data sample
+
+$$\mathcal{L}(\mathbf{X} |\ \mathbf{\theta}) = \prod_{i=1}^n f(x_i | \mathbf{\theta})$$
+
+- In most practical cases, we work with the **log likelibood**      
+
+$$l(\mathbf{X} |\ \mathbf{\theta}) = log\big( \mathcal{L}(\mathbf{X} |\ \mathbf{\theta}) \big) = \sum_{j} log \Big( f(x_j\ |\ \vec{\theta}) \Big)$$
+
+
+- The maximum likelihood for the model parameters is achieved when two conditions are met:  
+
+$$
+\frac{\partial\ l(\mathbf{X} |\ \mathbf{\theta})}{\partial \theta} = 0 \\
+\frac{\partial^2\ l(\mathbf{X} |\ \mathbf{\theta}) }{\partial \theta^2} < 0
+$$
+
+- Gradient of the log-likelihood is known as the score function   
+
+
+## Review   
+
+- Matrix is the **observed information matrix** of the model, $\mathcal{J}(\vec{\theta})$.   
+
+- The more negative the values of the second partial derivatives, the greater the curvature of the log-likehihood  
+
+- Fisher information or **expected information** is the expectation over the second derivative of the observed information            
+
+$$\mathcal{J}(\vec{\theta}) = -\mathbf{E}\big\{ \mathcal{I}(\vec{\theta}) \big\} = -\mathbf{E}\big\{ \frac{\partial^2\ l(\mathbf{X} | \theta)}{\partial \theta^2} \big\}$$
+
+- Fisher information relates to the score function as its variance   
+
+$$
+\frac{\partial\ l(\theta)}{ \partial \theta}\ \dot{\sim}\
+\mathcal{N} \big(0, 1/ \mathcal{I}_\theta \big)
+$$
+
+
+- For **large sample**, $n \rightarrow \infty$, take the expectation over $\mathbf{X}$:    
+
+$$\hat{\theta} \dot{\sim} \mathcal{N}\Big(\theta, \frac{1}{n\mathcal{I}(\theta)} \Big)$$
+
+
+- The maximum likelihood estimate of model parameters, $\hat{\theta}$, is Normally distributed      
+
+- The larger the Fisher information, the lower the variance of the parameter estimate    
+   - Greater curvature of the log likelihood function gives more certain the parameter estimates       
+   - The variance of the parameter estimate is inversely proportional to the number of samples, $n$   
+
+## Review  
+
+- The gradient descent method finds the maximum of the log-likelihood function by following the gradient 'uphill'    
+
+ - Given a current parameter estimate vector at step n , $\hat{\theta}_n$, the improved parameter estimate vector,  $\hat{\theta}_{n+1}$, is found:    
+
+$$\hat{\theta}_{n+1} = \hat{\theta}_n + \gamma\ \nabla_\theta\ l(\hat{\theta})$$   
+
+- The hyperparameter $\gamma$ is the **learning rate** or **step size**     
+
+- Stochastic optimization uses a Bernoulli random sample of the data to estimate the **expected update** of the model weights     
+
+$$\hat{\theta}_{n+1} = \hat{\theta}_n + \gamma\ E_{\hat{p}data}\Big[ \nabla_\theta\ l(\hat{\theta}) \Big]$$ 
+
+- Where, $E_{\hat{p}data} \big[ \big]$ is the expected value of the gradient given the Bernoulli sample of the data, $\hat{p}data$.
+
+- Empirically, SGD has good convergence properties     
+
+
+
+
+## Review  
+
+The maximum likelihood estimator has a number of important limitations, including   
+
+- Incorrect model and complex distributions     
+
+- Parameter near limits      
+
+- High dimensional problems     
+
+- Correlated features   
+
+
+
+## Introduction to Statistical Inference       
+
+All statistical inference has uncertainty    
+
+- Characterization of uncertainty is a goal of statistical inference  
+  - Any model using real-world data has inherent uncertainty  
+  
+- Statistical inference seeks to avoid being [**fooled by randomness**](https://www.penguinrandomhouse.com/books/176225/fooled-by-randomness-by-nassim-nicholas-taleb/); A catchy title of a book  
+
+
+## Introduction to Statistical Inference       
+
+All statistical inference has uncertainty   
+
+- A very few examples of false inference from randomness     
+
+| Hypothesis  | Fooled by Randomness |
+|:----------------------- | :----------------- |
+| How certain are you that eating fast food improves your health? | Some of my friends are doing great on this diet |   
+| How much confidence should we have that a marketing campaign increased sales? | Sales are up in the last month since the campaign started |  
+| How effective is a certain stock trading strategy for actually improving returns? | Traders using this strategy have made money recently | 
+| How good are the model parameter estimates? | The model has made accurate predictions so far | 
+   
+
+
+## Applications of Statistical Inference
+
+Confusingly, the term statistical inference is applied in many contexts
+
+Some applications of statistical inference include:
+
+**Inference on differences in distributions:** Are samples drawn from the same distribution or not?     
+- A **null hypothesis** is the hypothesis that the distributions are the same      
+
+**Inference for model parameters and model selection:** Statistical models, including machine learning models, have unknown parameters for which the values must be estimated        
+- Compute uncertainty in model parameter estimates    
+- Compare model performance     
+
+**Inference for prediction:** In recent decades the distinction between prediction and classical inference has blurred to the point of being irrelevant     
+- A common machine learning example, classification, uses decision rules determine the most likely class for each case of input values      
+- inference also used to determine the confidence in predictions            
+
+
+## Types of Hypothesis Tests
+
+Different tests for **one sample**, **two samples** or more    
+- **Parametric** test uses assumptions about the distribution of the data     
+- **Non-parametric** tests make no distribution assumptions    
+- Select test for **discrete or continuous**, or **numeric or categorical**, **ordinal, interval**, or **ratio** variables    
+- Tests can compare:   
+  - **effect size** (e.g. means), 
+  - **variance**, 
+  - **goodness of fit**, 
+  - **correlation** and **heteroskedasticityy**,
+  - **distribution assumptions**, or 
+  - **Independence**     
+
+
+
+## Inference for Hypotheses    
+
+**Hypothesis testing** seeks to answer the question, are the differences in a statistic **statistically significant**?      
+
+- Statistical significance must not be confused importance to the problem being addressed!   
+
+In 1922, Ronald A. Fisher warned:
+
+*"I believe that no one who is familiar, either with mathematical advances in other fields, or with the range of special biological conditions to be considered, would ever conceive that everything could be summed up in a single mathematical formula, however complex."*     
+
+
+## Inference for Hypotheses    
+  
+Many statisticians would say that a statistically significant result indicates a relationship worthy of further investigation       
+
+Examples of further investigation include:   
+     
+- Gather more data, either observational or experimental     
+
+- Find other variables which might illuminate the relationship under investigation    
+
+- Consider the theoretical basis of the relationship. e.g., can known science add understanding?   
+
+
+## Confidence Intervals; the Key to Inference     
+
+In frequentist statistics uncertainty of an inference is expressed in terms of a **confidence interval**     
+
+- A confidence interval is defined as the expected range of a statistical **point estimate**   
+  - A **point estimate** is the best estimate of a statistic          
+  - For example, the maximum likelihood estimate of a model parameter given the data   
+
+- Two types of of confidence intervals:   
+  - **Two-sided confidence intervals:** express confidence that a value is within some range around the point estimate 
+  - **One-sided confidence intervals:** express confidence that the point estimate is greater or less than some range of values
+
+## Confidence Intervals; the Key to Inference   
+
+Can understand **two sided** confidence interval by looking at the $\alpha/2$ and $1 - \alpha/2$ quantiles of a distribution    
+
+- Confidence interval corresponds to the span of the distribution between quantiles    
+
+- Express a **two-sided confidence interval** for a random variable, $\mathbf{x}$, in terms of the probability as:  
+
+$$1- \alpha = P \Big( Lower\ CI \le \mathbf{x} \le Upper\ CI \Big)$$
+
+Example: For Normal distribution the right and left tail probabilities are $\alpha/2$:
+
+$$\alpha/2 = P(-\infty \ge x \le Lower\ CI),\\ and,\\ 
+\alpha/2 = P(upper\ CI \ge x \le \infty)$$
+
+## Confidence Intervals; the Key to Inference   
+
+Can understand **one sided** confidence interval by looking at either $\alpha$ or $1 - \alpha$ quantiles of a distribution    
+
+- Characterize uncertainty of maximum or minimum value of a random variable  
+
+- For lower one-sided CI:    
+
+$$\alpha  = P(x \le Lower\ CI)$$
+
+- For upper one-sided CI:    
+
+$$\alpha = P(x \ge Upper\ CI)$$
+
+- Example: one-sided CIs of Normal distribution, starting with the lower CI:   
+
+$$\alpha = P\big( -\infty \ge x \le lower\ CI \big)$$
+
+Or for the upper confidence interval,    
+
+$$\alpha = P\big(upper\ CI \ge x \le  \infty \big)$$
+
+
+## Example; confidence intervals of the Normal distribution
+
+Illustrate the concept of confidence intervals with an example
+
+- The **cumulative distribution function (CDF)** of a standard Normal distribution, $N(0,1)$  
+
+- Double ended arrows with annotation are plotted to illustrate the **two-sided 95% confidence interval** on the CDF  
+  - Horizontal double arrow shows the range of the confidence interval    
+  - Vertical double arrow shows the part of the distribution within the confidence intervals
+    
+
+```{python, echo=FALSE}
+## Import
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import norm, chi2
+from scipy.optimize import brentq
+
+def plot_confidence(distribution, alpha, xmin, xmax, dist_type, step=0.05):
+    ## Set the font size and compute the CI for dispaly
+    plt.rc('font', size=8)
+    percent = str(int((1.0-2*alpha)*100))
+    
+    ## first find the cummulates 
+    x = np.arange(start=xmin, stop=xmax, step=0.05)
+    cumulates = distribution(x)
+    
+    ## plot the figure
+    fig, ax = plt.subplots(figsize=(8, 7), )  
+    ax.plot(x, cumulates, linewidth=6)
+    ax.hlines(y=0.0, xmin=xmax, xmax=xmin, linewidth=2, color='black')
+    ax.set_title('Cummulative distribution of ' + dist_type + ' with ' + percent + ' confidence intevals')
+    ax.set_ylabel('Probability')
+    ax.set_xlabel('Value')
+    
+    ## Plot horizontal lines at the quantiles 
+    ax.hlines(y=alpha, xmin=xmax, xmax=xmin, linewidth=6, color='r', linestyle='dotted')
+    ax.hlines(y=1.0-alpha, xmin=xmax, xmax=xmin, linewidth=6, color='r', linestyle='dotted')
+    
+    ## Fine the probabilities at the quantiles and plot vertical lines   
+    ## To do so, find the root of a function of the distribution
+    lower_ci = brentq(lambda x: distribution(x) - alpha, xmin, xmax)
+    ax.vlines(x=lower_ci, ymin=-0.2, ymax=1.0, linewidth=4, color='r', linestyle='dashed')
+    upper_ci = brentq(lambda x: distribution(x) - 1 + alpha, xmin, xmax)
+    ax.vlines(x=upper_ci, ymin=-0.2, ymax=1.0, linewidth=4, color='r', linestyle='dashed')
+    
+    ## Display the numeric results
+    print("Confidence Interval, lower: {0:5.2f}, upper: {1:5.2f}".format(lower_ci, upper_ci))
+    
+    ## Place double headed arrows for the range and confidence interval
+    ax.arrow(xmin,alpha,0.0,1-2*alpha-0.05, head_width=0.2, head_length=0.05, linewidth=3)
+    ax.arrow(xmin,1.0-alpha,0.0,-1+2*alpha+0.05, head_width=0.2, head_length=0.05, linewidth=3)
+    ax.text(xmin+0.1, 0.5, percent + '% of\nDistribution')
+    ax.arrow(lower_ci,-0.1,upper_ci-lower_ci-0.1, 0, head_width=0.05, head_length=0.1, linewidth=3)
+    ax.arrow(upper_ci,-0.1,-upper_ci+lower_ci+0.1, 0, head_width=0.05, head_length=0.1, linewidth=3)
+    ax.text((upper_ci + lower_ci)/2-1.0, -0.15, percent + '% Confidence Interval')
+    plt.show()
+
+distribution = norm.cdf
+plot_confidence(distribution, 0.025, -3.0, 3.0, 'Normal')
+```
+
+
+## Example, Inference for the mean
+
+$$CI(mean) = CI(\bar{\mathbf{X}}) = MLE(\theta | \mathbf{X})\ \pm\ \frac{MLE(s|\mathbf{X})}{\sqrt{n}} Z_\alpha$$
+
+Where,       
+- $Z_\alpha$ is the standard Normal distribution evaluated at confidence level, $\alpha$   
+- $MLE(\theta | \mathbf{X})$ is the maximum likelihood estiamte of the mean   
+- Standard error is given by $s/ \sqrt{n}$    
+- $MLE(s | \mathbf{X})$ is the standard deviation estimate    
+- $n$ is the number of samples      
+
+
+
+## Interpretation of Confidence Intervals      
+
+How can we interpret the confidence interval?    
+
+- Confidence intervals are with respect to the the sampling distribution of a statistic $s(\hat{\mathcal{F}})$  
+
+- CIs are a **measure of variation from sampling alone** with probability $\alpha$ - the basis of hypothesis testing! 
+
+- With probability $\alpha$ the sample statistic values computed from resamples of the population,$\hat{\mathcal{F}}_i$ are within the CI      
+
+- Confidence intervals **do not indicate the probability the population statistic is within a range!** 
+
+
+```{r Sampling, out.width = '50%', fig.cap='Sampling distribution of unknown population parameter', fig.align='center', echo=FALSE}
+knitr::include_graphics(rep("../images/SamplingDistribuion.png"))
+```
+
+
+## Confidence and Hypothesis Testing    
+
+Purpose of a statistical test is determining if the value of a chosen test statistic exceeds a cutoff value      
+
+- Select the cutoff value based on the confidence we wish to have in the test result     
+  - Example, by specifying a cutoff of  0.05  we are saying that the probability that the test statistic **exceeding the cutoff from random variation alone** is  0.05   
+  
+- Once the cutoff value has been set and the test statistic computed, interpret the results:  
+  - If the test statistic does not exceed the cutoff value, **fail to reject the null hypothesis**   
+  - If the test statistic exceeds the cutoff **reject the null hypothesis**   
+
+
+## Cutoffs for Hypothesis Tests   
+
+Examples of one-sided and two-sided cut-offs    
+
+- Cutoff is probability, $\alpha$, that **variation this great or greater arises from random sampling alone**    
+
+- In other words, cutoff is the **confidence** we have in rejecting a null hypothesis. 
+
+- A p-value is the **probability of the statistic this extreme or more extreme arising from random sampling** (random variation) alone     
+
+```{python, echo=FALSE}
+def cutoff_polygon(upper, cutoff, ax, step=0.02):
+    ## Plot the cuttoff area 
+    lower = norm.ppf(cutoff)
+    if(lower > upper):
+        ax.vlines(lower, 0.0, 0.15, color='red', linewidth=3);
+        ax.text(lower-1.6, 0.16, 'Cutoff value');
+        temp = upper
+        upper = lower
+        lower = temp  
+    else:
+        ax.vlines(lower, 0.0, 0.15, color='red', linewidth=3);
+        ax.text(lower, 0.16, 'Cutoff value');
+    x = list(np.arange(lower, upper, step))
+    norm_vals = list(np.apply_along_axis(lambda x: norm.pdf(x), 0, x))
+    x = x + [upper, lower]   
+    norm_vals = norm_vals + [0.0, 0.0];
+    ax.fill(x, norm_vals, 'black');
+    
+def plot_norm(start, end, ax, title, step=0.2):
+    ## Plot the Normal distribution 
+    x = np.arange(start, end, step=0.02)
+    norm_value = np.apply_along_axis(lambda x: norm.pdf(x), 0, x)
+    ax.plot(x, norm_value, linewidth=3, color='black');
+    ax.set_title(title);
+    ax.set_xlabel(' ');
+    ax.axhline(0.0, color='black');
+
+## Set up the plot grid
+fig, ax = plt.subplots(2, 2, figsize=(10, 6)); 
+alpha = 0.05
+
+## Two sided
+plot_norm(-4.0, 4.0, ax[0,0], title='Two sided, cutoff = ' + str(alpha))
+cutoff_polygon(4.0, 1.0- alpha/2.0, ax[0,0]);
+cutoff_polygon(-4.0, alpha/2.0, ax[0,0]);
+ax[0,1].axis('off')
+
+## Upper
+plot_norm(-4.0, 4.0, ax[1,0], title='One sided, upper, cutoff = ' + str(alpha))
+cutoff_polygon(4.0, 1.0- alpha, ax[1,0]);
+
+## Lower
+plot_norm(-4.0, 4.0, ax[1,1], title='Two sided, cutoff = ' + str(alpha))
+cutoff_polygon(-4.0, alpha, ax[1,1]);
+
+plt.show()
+
+```
+
+
+## Hypothesis testing steps
+
+The steps required to perform a formal two-sample hypothesis test
+
+- State population assumptions of null hypothesis: $H_0$    
+  - Typically stated in terms of a **control group**    
+
+- State alternative hypothesis: $H_a$    
+  - Typically stated in terms of a **treatment group**        
+  - Treatment is the factor that differentiates the population     
+  
+- Decide on a significance level (probability cutoff or **Type I error threshold**): e.g. 0.1, 0.05, 0.01, ...    
+
+- Data is collected for the different treatments    
+
+- Compute the **test statistic** and evaluate based on the cutoff value    
+
+
+## Hypothesis testing steps
+
+Test statistic used a a **decision rule**
+
+- Only two possible outcomes  
+  - **Reject the null-hypothesis:** This is not the same as accepting the alternative hypothesis    
+  - **Fail to reject the null hypothesis:** This is not the same as accepting the null hypothesis  
+  
+- Failing to rejecting the null hypothesis can occur for several reasons       
+  - The alternative hypothesis was false to begin with     
+  - There is not enough evidence for the **effect size**    
+  
+- Roughly speaking, the effect size is the difference of the test statistic in populations under the different treatments   
+
+
+
+## The P-Value
+
+- P-value is the probability, under $H_0$, that we get a statistic **as extreme or more extreme** than the one we got          
+
+- **Extreme** depends on whether the test is **one-tailed** or **two-tailed**      
+
+- Derive the p-value by computing the **statistic(s)** and evaluate the quantile of the null distribution, $H_0$     
+
+- Low p-value means our evidence against $H_0$ is too strong to ignore 
+  - How strong it needs to be is controlled by our choice of $\alpha$    
+  - **Smaller $\alpha$** means we need **stronger evidence** to reject $H_0$; a more **conservative** test      
+  
+- Together the p-value and the significance threshold $\alpha$ determine whether we reject or fail to reject $H_0$      
+  - The decision rule of the hypothesis test    
+  
+
+## Summary       
+
+Statistical inference seeks to characterize the uncertainty in estimates    
+
+- Statistics are estimates of population parameters    
+
+- Inferences using statistics must consider the uncertainty in the estimates   
+
+- Confidence intervals quantify uncertainty in statistical estimates    
+   - **Two-sided confidence intervals:** express confidence that a value is within some range around the point estimate     
+  - **One-sided confidence intervals:** express confidence that the point estimate is greater or less than some range of values     
+  
+- Hypothesis tests based on the confidence we have that variation in statistic arrises from sampling variation alone     
